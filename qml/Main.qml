@@ -39,13 +39,26 @@ MainView {
         anchors.fill: parent
         visible: !pythonReady
 
-        Label {
+        Rectangle {
             anchors.fill: parent
-            text: 'Bluedog'
+            color: "#1386DC"
 
-            verticalAlignment: Label.AlignVCenter
-            horizontalAlignment: Label.AlignHCenter
+            Image {
+                id: splashLogo
+                anchors.centerIn: parent
+                source: Qt.resolvedUrl('../assets/icon_splash.svg')
+                width: parent.width * 0.3
+                height: width
+                fillMode: Image.PreserveAspectFit
+            }
         }
+        // Label {
+        //     anchors.fill: parent
+        //     text: 'Bluedog'
+
+        //     verticalAlignment: Label.AlignVCenter
+        //     horizontalAlignment: Label.AlignHCenter
+        // }
     }
 
     Python {
