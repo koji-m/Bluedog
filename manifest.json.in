@@ -1,0 +1,15 @@
+{
+    "name": "bluedog.koji-m",
+    "description": "Bluesky client",
+    "architecture": "@CLICK_ARCH@",
+    "title": "Bluedog",
+    "hooks": {
+        "bluedog": {
+            "apparmor": "bluedog.apparmor",
+            "desktop":  "bluedog.desktop"
+        }
+    },
+    "version": "1.0.0",
+    "maintainer": "Koji Matsumoto <otomustam.ijok@gmail.com>",
+    "framework" : "@CLICK_FRAMEWORK@"
+}
