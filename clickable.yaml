@@ -11,7 +11,7 @@ prebuild:
   - |
     ARCH=${ARCH}
     EXTRA_ARGS=""
-    if [ "$ARCH" = "arm64" ]; then
+    if [ "$ARCH" = "arm64" ] || [ "$ARCH" = "armhf" ]; then
     EXTRA_ARGS="--platform manylinux2014_aarch64"
     fi
     pip3 install --disable-pip-version-check --no-compile --only-binary=:all: $EXTRA_ARGS -r ${ROOT}/requirements.txt --target ${INSTALL_DIR}/python
