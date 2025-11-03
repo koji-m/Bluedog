@@ -327,3 +327,8 @@ def unfollow_user(uri: str):
     if _timeline is None:
         raise RuntimeError("backend not initialized. Call init() first.")
     return _timeline.unfollow_user(uri)
+
+def sign_out():
+    global _timeline
+    auth.sign_out()
+    _timeline = None

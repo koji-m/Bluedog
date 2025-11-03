@@ -124,9 +124,12 @@ MainView {
         id: settingsPage
         SettingsPage {
             onSignOutRequested: function () {
-                py.call('auth.sign_out', [])
-                stack.clear()
-                stack.push(signInPage)
+                py.call('backend.sign_out', [], function (res) {
+                    stack.clear()
+                    stack.push(signInPage)
+                }, function (err) {
+                    errorLabel.text = "" + err
+                })
             }
         }
     }
