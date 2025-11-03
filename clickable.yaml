@@ -1,5 +1,6 @@
 clickable_minimum_required: 8.0.0
 builder: cmake
+framework: ubuntu-touch-24.04-1.x
 kill: qmlscene
 dependencies_host:
   - python3-pip
