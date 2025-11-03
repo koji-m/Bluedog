@@ -38,12 +38,12 @@ Page {
 
         TextField {
             id: userField
-            placeholderText: "username"
+            placeholderText: "handle"
             focus: true
         }
         TextField {
             id: passField
-            placeholderText: "password"
+            placeholderText: "app password"
             echoMode: TextInput.Password
             onAccepted: loginButton.clicked()
         }
@@ -60,7 +60,7 @@ Page {
                         if (res.status === 'ok') {
                             page.signedIn()
                         } else {
-                            errorLabel.text = res.message || "Sign in failed"
+                            errorLabel.text = "Sign in failed"
                         }
                     }, function (err) {
                         busy.running = false
@@ -70,6 +70,6 @@ Page {
             }
         }
         ActivityIndicator { id: busy; running: false; visible: running }
-        Label { id: errorLabel; color: theme.palette.normal.negativeText }
+        Label { id: errorLabel; color: "red" }
     }
 }
