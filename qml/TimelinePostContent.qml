@@ -199,7 +199,7 @@ Item {
             id: externUrlContainer
             width: root.width
             implicitHeight: embed && embed.type === "external"
-                ? externUrlLayout.implicitHeight
+                ? externUrlLayout.height
                 : 0
             visible: embed && embed.type === "external" ? true : false
             border.width: 1

@@ -293,7 +293,7 @@ Page {
                         id: externUrlContainer
                         width: parent.width - units.gu(2)
                         implicitHeight: page.embed && page.embed.type === "external"
-                                ? externUrlLayout.implicitHeight
+                                ? externUrlLayout.height
                                 : 0
                         visible: page.embed && page.embed.type === "external" ? true : false
                         border.width: 1

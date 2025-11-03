@@ -93,7 +93,7 @@ Page {
         header: Component {
             Item {
                 width: profileWithPosts.width
-                height: banner.height + avatarRow.height / 2 + infoCol.implicitHeight + units.gu(0.5)
+                height: banner.height + avatarRow.height / 2 + infoCol.height + units.gu(0.5)
 
                 Image {
                     id: banner
