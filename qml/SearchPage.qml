@@ -123,6 +123,8 @@ Page {
                     quotePost: model.quotePost
                     embed: model.embed
                     uri: model.uri
+                    cid: model.cid
+                    viewerLikeUri: model.viewerLikeUri
                     onImageClicked: function(imageUrl) {
                         page.imageClicked(imageUrl)
                     }
@@ -179,6 +181,8 @@ Page {
                     quotePost: res.items[i].quotePost ? JSON.stringify(res.items[i].quotePost) : '',
                     embed: res.items[i].embed ? JSON.stringify(res.items[i].embed) : '',
                     uri: res.items[i].uri,
+                    cid: res.items[i].cid,
+                    viewerLikeUri: res.items[i].viewer_like_uri,
                 })
             }
             nextCursor = res.nextCursor || ""

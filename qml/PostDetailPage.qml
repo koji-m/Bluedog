@@ -409,10 +409,12 @@ Page {
                                 width: units.gu(2)
                                 height: units.gu(2)
                                 name: "like"
+                                color: root.viewerLikeUri === "" ? "gray" : "deeppink"
                             }
                             Text {
                                 id: likeCount
                                 text: page.likeCount > 0 ? page.likeCount : ""
+                                color: root.viewerLikeUri === "" ? "black" : "deeppink"
                                 font.weight: Font.Thin
                                 Layout.minimumWidth: units.gu(3)
                                 Layout.minimumHeight: parent.height
@@ -456,6 +458,8 @@ Page {
                     quotePost: model.quotePost
                     embed: model.embed
                     uri: model.uri
+                    cid: model.cid
+                    viewerLikeUri: model.viewerLikeUri
                     onImageClicked: function(imageUrl) {
                         page.imageClicked(imageUrl)
                     }
@@ -506,6 +510,8 @@ Page {
                     quotePost: res.items[i].quotePost ? JSON.stringify(res.items[i].quotePost) : '',
                     embed: res.items[i].embed ? JSON.stringify(res.items[i].embed) : '',
                     uri: res.items[i].uri,
+                    cid: res.items[i].cid,
+                    viewerLikeUri: res.items[i].viewer_like_uri,
                 })
             }
             loading = false

@@ -35,6 +35,8 @@ RowLayout {
     property var quotePost: null
     property var embed: null
     property string uri: ""
+    property string cid: ""
+    property string viewerLikeUri: ""
 
     signal imageClicked(string imageUrl)
     signal videoClicked(string videoUrl)
@@ -103,6 +105,8 @@ RowLayout {
         quotePost: root.quotePost ? JSON.parse(root.quotePost) : null
         embed: root.embed ? JSON.parse(root.embed) : null
         uri: root.uri
+        cid: root.cid
+        viewerLikeUri: root.viewerLikeUri
         onImageClicked: function(imageUrl) {
             root.imageClicked(imageUrl)
         }

@@ -93,6 +93,8 @@ class TimelineBackend:
             "quotePost": quote_post,
             "embed": embed,
             "uri": post.uri,
+            "cid": post.cid,
+            "viewer_like_uri": post.viewer.like if post.viewer and post.viewer.like else "",
         }
 
     def fetch_post(self, rkey: str, handle: str):

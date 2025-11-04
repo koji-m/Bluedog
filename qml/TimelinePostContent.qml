@@ -33,6 +33,8 @@ Item {
     property var quotePost: null
     property var embed: null
     property string uri: ""
+    property string cid: ""
+    property string viewerLikeUri: ""
 
     signal imageClicked(string imageUrl)
     signal videoClicked(string videoUrl)
@@ -332,10 +334,12 @@ Item {
                     width: units.gu(2)
                     height: units.gu(2)
                     name: "like"
+                    color: root.viewerLikeUri === "" ? "gray" : "deeppink"
                 }
                 Text {
                     id: likeCount
                     text: root.likeCount > 0 ? root.likeCount : ""
+                    color: root.viewerLikeUri === "" ? "black" : "deeppink"
                     font.weight: Font.Thin
                     Layout.minimumWidth: units.gu(3)
                     Layout.minimumHeight: parent.height
