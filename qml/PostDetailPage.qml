@@ -408,10 +408,40 @@ Page {
                             id: like
                             spacing: 1
                             Icon {
+                                id: likeIcon
                                 width: units.gu(2)
                                 height: units.gu(2)
                                 name: "like"
                                 color: page.viewerLikeUri === "" ? "gray" : "deeppink"
+
+                                function likeClicked() {
+                                    if (page.viewerLikeUri === "") {
+                                        py.call("backend.like_post", [page.uri, page.cid], function(res) {
+                                            if (res.status === "succeeded") {
+                                                page.viewerLikeUri = res.uri;
+                                                page.likeCount += 1;
+                                            }
+                                        }, function(err) {
+                                            console.log("likePost error:", err)
+                                        })
+                                    } else {
+                                        py.call("backend.unlike_post", [page.viewerLikeUri], function(res) {
+                                            if (res.status === "succeeded") {
+                                                page.viewerLikeUri = "";
+                                                page.likeCount -= 1;
+                                            }
+                                        }, function(err) {
+                                            console.log("unlikePost error:", err)
+                                        })
+                                    }
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: {
+                                        likeIcon.likeClicked();
+                                    }
+                                }
                             }
                             Text {
                                 id: likeCount

@@ -223,6 +223,8 @@ Page {
                 quotePost: post.quotePost ? JSON.stringify(post.quotePost) : '',
                 embed: post.embed ? JSON.stringify(post.embed) : '',
                 uri: post.uri,
+                cid: post.cid,
+                viewerLikeUri: post.viewer_like_uri,
             })
             nextCursor = res.nextCursor || ''
             hasMore = res.hasMore

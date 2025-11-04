@@ -238,6 +238,31 @@ class TimelineBackend:
             "status": "succeeded" if res else "failed",
         }
 
+    def like_post(self, uri: str, cid: str):
+        try:
+            res = self.client.like(uri=uri, cid=cid)
+            return {
+                "status": "succeeded",
+                "uri": res.uri,
+            }
+        except Exception as e:
+            return {
+                "status": "failed",
+                "error": str(e),
+            }
+
+    def unlike_post(self, uri: str):
+        try:
+            res = self.client.unlike(like_uri=uri)
+            return {
+                "status": "succeeded" if res else "failed",
+            }
+        except Exception as e:
+            return {
+                "status": "failed",
+                "error": str(e),
+            }
+
 
 def init(data_dir: str):
     global _timeline
@@ -334,3 +359,15 @@ def sign_out():
     global _timeline
     auth.sign_out()
     _timeline = None
+
+
+def like_post(uri: str, cid: str):
+    if _timeline is None:
+        raise RuntimeError("backend not initialized. Call init() first.")
+    return _timeline.like_post(uri=uri, cid=cid)
+
+
+def unlike_post(uri: str):
+    if _timeline is None:
+        raise RuntimeError("backend not initialized. Call init() first.")
+    return _timeline.unlike_post(uri)

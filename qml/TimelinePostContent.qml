@@ -331,10 +331,40 @@ Item {
                 id: like
                 spacing: 1
                 Icon {
+                    id: likeIcon
                     width: units.gu(2)
                     height: units.gu(2)
                     name: "like"
                     color: root.viewerLikeUri === "" ? "gray" : "deeppink"
+
+                    function likeClicked() {
+                        if (root.viewerLikeUri === "") {
+                            py.call("backend.like_post", [root.uri, root.cid], function(res) {
+                                if (res.status === "succeeded") {
+                                    root.viewerLikeUri = res.uri;
+                                    root.likeCount += 1;
+                                }
+                            }, function(err) {
+                                console.log("likePost error:", err)
+                            })
+                        } else {
+                            py.call("backend.unlike_post", [root.viewerLikeUri], function(res) {
+                                if (res.status === "succeeded") {
+                                    root.viewerLikeUri = "";
+                                    root.likeCount -= 1;
+                                }
+                            }, function(err) {
+                                console.log("unlikePost error:", err)
+                            })
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            likeIcon.likeClicked();
+                        }
+                    }
                 }
                 Text {
                     id: likeCount
