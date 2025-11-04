@@ -155,7 +155,9 @@ MainView {
                     quoteAndRepostCount: post.quoteAndRepostCount,
                     likeCount: post.likeCount,
                     uri: post.uri,
-                    embed: post.embed ? JSON.parse(post.embed) : null
+                    embed: post.embed ? JSON.parse(post.embed) : null,
+                    cid: post.cid,
+                    viewerLikeUri: post.viewerLikeUri
                 })
             }
             onAvatarClicked: function(
@@ -202,7 +204,9 @@ MainView {
                     quoteAndRepostCount: post.quoteAndRepostCount,
                     likeCount: post.likeCount,
                     uri: post.uri,
-                    embed: post.embed ? JSON.parse(post.embed) : null
+                    embed: post.embed ? JSON.parse(post.embed) : null,
+                    cid: post.cid,
+                    viewerLikeUri: post.viewerLikeUri
                 })
             }
             onAvatarClicked: function(
@@ -247,7 +251,9 @@ MainView {
                     quoteAndRepostCount: post.quoteAndRepostCount,
                     likeCount: post.likeCount,
                     uri: post.uri,
-                    embed: post.embed ? JSON.parse(post.embed) : null
+                    embed: post.embed ? JSON.parse(post.embed) : null,
+                    cid: post.cid,
+                    viewerLikeUri: post.viewerLikeUri
                 })
             }
             onAvatarClicked: function(
@@ -287,7 +293,9 @@ MainView {
                     quoteAndRepostCount: post.quoteAndRepostCount,
                     likeCount: post.likeCount,
                     uri: post.uri,
-                    embed: post.embed ? JSON.parse(post.embed) : null
+                    embed: post.embed ? JSON.parse(post.embed) : null,
+                    cid: post.cid,
+                    viewerLikeUri: post.viewerLikeUri
                 })
             }
             onAvatarClicked: function(

@@ -37,6 +37,8 @@ Page {
     property int likeCount: 0
     property string uri: ""
     property var embed: null
+    property string cid: ""
+    property string viewerLikeUri: ""
 
     signal openSettings()
     signal imageClicked(string imageUrl)
@@ -409,12 +411,12 @@ Page {
                                 width: units.gu(2)
                                 height: units.gu(2)
                                 name: "like"
-                                color: root.viewerLikeUri === "" ? "gray" : "deeppink"
+                                color: page.viewerLikeUri === "" ? "gray" : "deeppink"
                             }
                             Text {
                                 id: likeCount
                                 text: page.likeCount > 0 ? page.likeCount : ""
-                                color: root.viewerLikeUri === "" ? "black" : "deeppink"
+                                color: page.viewerLikeUri === "" ? "black" : "deeppink"
                                 font.weight: Font.Thin
                                 Layout.minimumWidth: units.gu(3)
                                 Layout.minimumHeight: parent.height
