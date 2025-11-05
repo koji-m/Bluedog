@@ -38,6 +38,7 @@ Page {
         string authorDisplayName,
         string authorHandle
     )
+    signal openPostClicked()
 
     header: PageHeader {
         id: header
@@ -165,6 +166,31 @@ Page {
     }
 
     ListModel { id: postsModel }
+
+    Rectangle {
+        id: openPostPanelButton
+        width: units.gu(5)
+        height: units.gu(5)
+        radius: width / 2
+        color: "#1386DC"
+        anchors {
+            bottom: parent.bottom
+            right: parent.right
+            rightMargin: units.gu(2)
+            bottomMargin: units.gu(2)
+        }
+        Icon {
+            name: "edit"
+            anchors.centerIn: parent
+            width: units.gu(3)
+            height: width
+            color: "white"
+        }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: page.openPostClicked()
+        }
+    }
     
     function resetState() {
         py.call("backend.reset_state", [], function(res) {

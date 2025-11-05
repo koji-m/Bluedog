@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bluedog.koji-m\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-04 11:47+0000\n"
+"POT-Creation-Date: 2025-11-05 10:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,11 +17,11 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../qml/PostDetailPage.qml:77 ../qml/TimelinePage.qml:57
+#: ../qml/PostDetailPage.qml:77 ../qml/TimelinePage.qml:58
 msgid "Settings"
 msgstr ""
 
-#: ../qml/TimelinePage.qml:62
+#: ../qml/TimelinePage.qml:63
 msgid "Search"
 msgstr ""
 

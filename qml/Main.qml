@@ -222,6 +222,9 @@ MainView {
                     userHandle: authorHandle
                 })
             }
+            onOpenPostClicked: function() {
+                stack.push(postPage)
+            }
         }
     }
     Component {
@@ -313,6 +316,15 @@ MainView {
             }
         }
     }
+    Component {
+        id: postPage
+        PostPage {
+            onFinished: function() {
+                stack.pop()
+            }
+        }
+    }
+
     Rectangle {
         id: imagePopupBackground
         anchors.fill: parent
@@ -337,7 +349,6 @@ MainView {
             onClicked: imagePopupBackground.visible = false
         }
     }
-
     Rectangle {
         id: videoPopupBackground
         anchors.fill: parent
