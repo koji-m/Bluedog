@@ -29,6 +29,40 @@ Page {
 
     header: PageHeader {
         id: header
+
+        Row {
+            anchors {
+                top: parent.top
+                right: parent.right
+                topMargin: units.gu(1)
+                rightMargin: units.gu(1)
+            }
+            spacing: 8
+
+            ActivityIndicator {
+                id: activity
+            }
+
+            Button {
+                id: postButton
+
+                text: "Post"
+                color: "#1386DC"
+                enabled: editor.text.length > 0 || imageModel.count > 0
+
+                signal enable()
+
+                onEnable: {
+                    editor.text.length > 0 ? enabled = true : enabled = false
+                }
+
+                onClicked: {
+                    errorLabel.text = ""
+                    enabled = false
+                    root.post(editor.text)
+                }
+            }
+        }
     }
 
     ListModel {
@@ -40,12 +74,12 @@ Page {
             top: header.bottom
             right: parent.right
         }
-        spacing: units.gu(1)
 
         TextArea {
             id: editor
             Layout.fillWidth: true
-            Layout.margins: units.gu(1)
+            Layout.leftMargin: units.gu(1)
+            Layout.rightMargin: units.gu(1)
             wrapMode: TextEdit.Wrap
             placeholderText: "What's on your mind?"
             width: parent.width
@@ -55,6 +89,26 @@ Page {
 
             onReset: {
                 text = ""
+            }
+        }
+
+        Row {
+            Layout.alignment: Qt.AlignTop
+            Layout.leftMargin: units.gu(1)
+            spacing: 8
+            Icon {
+                width: units.gu(4)
+                height: units.gu(4)
+                color: "#1386DC"
+                name: "stock_image"
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        errorLabel.text = ""
+                        root.openImagePicker()
+                    }
+                }
             }
         }
 
@@ -94,59 +148,12 @@ Page {
         Label {
             id: errorLabel
             Layout.alignment: Qt.AlignTop
+            Layout.leftMargin: units.gu(1)
             wrapMode: Text.Wrap
             text: ""
             color: "red"
             visible: text.length > 0
             Layout.fillWidth: true
-        }
-
-        Row {
-            Layout.alignment: Qt.AlignTop
-            spacing: 8
-            Button {
-                id: selectImageButton
-                text: "image"
-                color: "#1386DC"
-
-                onClicked: {
-                    errorLabel.text = ""
-                    root.openImagePicker()
-                }
-            }
-        }
-
-        Row {
-            Layout.alignment: Qt.AlignTop
-            spacing: 8
-            Button {
-                text: "Cancel"
-                onClicked: {
-                    editor.reset()
-                    root.finished()
-                }
-            }
-            Button {
-                id: postButton
-                text: "Post"
-                color: "#1386DC"
-                enabled: editor.text.length > 0
-
-                signal enable()
-
-                onEnable: {
-                    editor.text.length > 0 ? enabled = true : enabled = false
-                }
-
-                onClicked: {
-                    errorLabel.text = ""
-                    enabled = false
-                    root.post(editor.text)
-                }
-            }
-            ActivityIndicator {
-                id: activity
-            }
         }
     }
 
