@@ -16,6 +16,7 @@
 
 import QtQuick 2.7
 import Lomiri.Components 1.3
+import Lomiri.Content 1.1
 import QtQuick.Layouts 1.3
 import Qt.labs.settings 1.0
 import Qt.labs.platform 1.0
@@ -319,6 +320,26 @@ MainView {
     Component {
         id: postPage
         PostPage {
+            onFinished: function() {
+                stack.pop()
+            }
+            onOpenImagePicker: function() {
+                stack.push(imagePickerPage, {postPage: this})
+            }
+        }
+    }
+    Component {
+        id: imagePickerPage
+        MediaPickerPage {
+            property var postPage
+            contentType: ContentType.Pictures
+            handler: ContentHandler.Source
+
+            onImported: function(fileUrls) {
+                console.log("Imported file URL:", fileUrls)
+                postPage.setImages(fileUrls)
+                stack.pop()
+            }
             onFinished: function() {
                 stack.pop()
             }

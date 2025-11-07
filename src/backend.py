@@ -1,4 +1,8 @@
+from urllib.parse import urlparse
+from urllib.request import url2pathname
+
 from atproto import models
+from atproto_client.models import AppBskyEmbedImages
 
 import auth
 
@@ -333,11 +337,31 @@ def fetch_user_posts(did: str, limit=30, cursor=None):
     return _timeline.fetch_user_posts(did=did, limit=limit, cursor=cursor)
 
 
-def post(text: str):
+def post(text: str, image_urls: list[str]):
     try:
         client = auth.init_client()
 
-        client.send_post(text=text)
+        blob_refs = []
+        for image_url in image_urls:
+            path = url2pathname(urlparse(image_url).path)
+            with open(path, "rb") as f:
+                image_data = f.read()
+            blob = client.upload_blob(image_data)
+            blob_refs.append(blob.blob)
+
+        embed = AppBskyEmbedImages.Main(
+            images=[
+                AppBskyEmbedImages.Image(
+                    alt="",
+                    image=blob,
+                )
+                for blob in blob_refs
+            ]
+        )
+        client.send_post(
+            text=text,
+            embed=embed,
+        )
 
         return {"status": "succeeded"}
     except Exception as e:

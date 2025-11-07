@@ -22,12 +22,22 @@ import io.thp.pyotherside 1.4
 
 Page {
     id: root
-    signal finished()
 
+    signal finished()
+    signal openImagePicker()
+    signal setImages(var fileUrls)
+
+    header: PageHeader {
+        id: header
+    }
+
+    ListModel {
+        id: imageModel
+    }
     ColumnLayout {
         anchors {
             left: parent.left
-            top: parent.top
+            top: header.bottom
             right: parent.right
         }
         spacing: units.gu(1)
@@ -48,13 +58,62 @@ Page {
             }
         }
 
+        Row {
+            id: imageRow
+            Layout.leftMargin: units.gu(1)
+            spacing: units.gu(0.3)
+
+            Repeater {
+                model: imageModel
+                delegate: Rectangle {
+                    width: (root.width - units.gu(1) * 2) / 4 - imageRow.spacing
+                    height: width
+                    border.width: 1
+                    Image {
+                        anchors {
+                            fill: parent
+                            margins: 1
+                        }
+                        source: url
+                        asynchronous: true
+                        fillMode: Image.PreserveAspectCrop
+
+                        onStatusChanged: {
+                            if (status === Image.Error) {
+                                console.log("Error loading image:", source)
+                            }
+                            if (status === Image.Ready) {
+                                console.log("Image loaded:", source)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         Label {
             id: errorLabel
             Layout.alignment: Qt.AlignTop
+            wrapMode: Text.Wrap
             text: ""
             color: "red"
             visible: text.length > 0
             Layout.fillWidth: true
+        }
+
+        Row {
+            Layout.alignment: Qt.AlignTop
+            spacing: 8
+            Button {
+                id: selectImageButton
+                text: "image"
+                color: "#1386DC"
+
+                onClicked: {
+                    errorLabel.text = ""
+                    root.openImagePicker()
+                }
+            }
         }
 
         Row {
@@ -85,19 +144,43 @@ Page {
                     root.post(editor.text)
                 }
             }
+            ActivityIndicator {
+                id: activity
+            }
+        }
+    }
+
+    onSetImages: function(fileUrls) {
+        console.log("Adding image URL:", fileUrls)
+        imageModel.clear()
+        if (fileUrls.length > 4) {
+            errorLabel.text = "You can select up to 4 images."
+            return
+        }
+        for (var i = 0; i < fileUrls.length; i++) {
+            imageModel.append({url: fileUrls[i]})
+            console.log("Appended image URL:", fileUrls[i])
         }
     }
 
     function post(text) {
-        py.call("backend.post", [text], function(res) {
+        activity.running = true
+        var imageUrls = []
+        for (var i = 0; i < imageModel.count; i++) {
+            imageUrls.push(imageModel.get(i).url)
+        }
+        py.call("backend.post", [text, imageUrls], function(res) {
             if (res.status === 'succeeded') {
                 editor.reset()
+                activity.running = false
                 root.finished()
             } else {
                 errorLabel.text = "Error: " + res.error
+                activity.running = false
                 postButton.enable()
             }
         }, function(err) {
+            activity.running = false
             console.log("post error:", err)
         })
     }
