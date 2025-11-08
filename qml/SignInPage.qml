@@ -28,11 +28,14 @@ Page {
     }
 
     Column {
-        anchors.margins: units.gu(2)
+        id: signInForm
         anchors {
             top: header.bottom
             left: parent.left
             right: parent.right
+            topMargin: units.gu(2)
+            leftMargin: units.gu(2)
+            rightMargin: units.gu(2)
         }
         spacing: units.gu(1)
 
@@ -51,7 +54,8 @@ Page {
         Button {
             id: loginButton
             text: busy.running ? "Signing in..." : "Sign in"
-            enabled: !busy.running
+            color: "#1386DC"
+            enabled: !busy.running && userField.text.length > 0 && passField.text.length > 0
             onClicked: {
                 py.importModule('auth', function () {
                     busy.running = true
@@ -71,5 +75,26 @@ Page {
         }
         ActivityIndicator { id: busy; running: false; visible: running }
         Label { id: errorLabel; color: "red" }
+    }
+
+    Row {
+        anchors {
+            top: signInForm.bottom
+            left: parent.left
+            right: parent.right
+            margins: units.gu(2)
+        }
+        spacing: units.gu(0.5)
+        Icon {
+            id: infoIcon
+            width: units.gu(2)
+            height: units.gu(2)
+            name: "info"
+        }
+        Label {
+            width: parent.width - infoIcon.width
+            text: "The password here is an app password, not your main password. You need to create an app password on your Bluesky account settings page."
+            wrapMode: Text.Wrap
+        }
     }
 }
