@@ -73,6 +73,7 @@ Page {
             left: parent.left
             top: header.bottom
             right: parent.right
+            topMargin: units.gu(2)
         }
 
         TextArea {
