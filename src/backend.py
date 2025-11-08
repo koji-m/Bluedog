@@ -40,25 +40,27 @@ class TimelineBackend:
         quote_post = None
         if hasattr(post, "embed") and isinstance(post.embed, models.AppBskyEmbedRecord.View):
             quote_record = post.embed.record
-            quote_author = quote_record.author
+            # ToDo: handle StarterPack
+            if not isinstance(quote_record, models.app.bsky.graph.defs.StarterPackViewBasic):
+                quote_author = quote_record.author
 
-            quote_embeds = []
-            for quote_embed in quote_record.embeds:
-                if isinstance(quote_embed, models.AppBskyEmbedImages.View):
-                    quote_embeds.append({
-                        "type": "images",
-                        "thumbs": [image.thumb for image in quote_embed.images],
-                    })
+                quote_embeds = []
+                for quote_embed in quote_record.embeds:
+                    if isinstance(quote_embed, models.AppBskyEmbedImages.View):
+                        quote_embeds.append({
+                            "type": "images",
+                            "thumbs": [image.thumb for image in quote_embed.images],
+                        })
 
-            quote_post = {
-                "text": quote_record.value.text,
-                "avatar": quote_author.avatar,
-                "authorHandle": quote_author.handle,
-                "authorDisplayName": quote_author.display_name,
-                "authorDid": quote_author.did,
-                "postedAt": quote_record.indexed_at,
-                "embeds": quote_embeds,
-            }
+                quote_post = {
+                    "text": quote_record.value.text,
+                    "avatar": quote_author.avatar,
+                    "authorHandle": quote_author.handle,
+                    "authorDisplayName": quote_author.display_name,
+                    "authorDid": quote_author.did,
+                    "postedAt": quote_record.indexed_at,
+                    "embeds": quote_embeds,
+                }
 
         if hasattr(post, "embed"):
             if isinstance(post.embed, models.AppBskyEmbedImages.View):
