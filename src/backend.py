@@ -187,6 +187,14 @@ class TimelineBackend:
             "followingUri": profile.viewer.following if profile.viewer and profile.viewer.following else "",
         }
 
+    def fetch_my_profile(self):
+        return {
+            "did": self.client.me.did,
+            "avatar": self.client.me.avatar,
+            "displayName": self.client.me.display_name,
+            "handle": self.client.me.handle,
+        }
+
     def reset_user_posts_cache(self):
         self.author_feed_next_cursor = None
         self.author_feed_seen_uris = set()
@@ -275,7 +283,9 @@ def init(data_dir: str):
     if _timeline is None:
         try:
             _timeline = TimelineBackend(data_dir)
-            return {"status": "succeeded"}
+            res = _timeline.fetch_my_profile()
+            res["status"] = "succeeded"
+            return res
         except Exception:
             return {"status": "failed"}
 
@@ -397,3 +407,8 @@ def unlike_post(uri: str):
     if _timeline is None:
         raise RuntimeError("backend not initialized. Call init() first.")
     return _timeline.unlike_post(uri)
+
+def fetch_my_profile():
+    if _timeline is None:
+        raise RuntimeError("backend not initialized. Call init() first.")
+    return _timeline.fetch_my_profile()

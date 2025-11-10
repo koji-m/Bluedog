@@ -27,6 +27,7 @@ Page {
     property bool hasMore: true
     property string nextCursor: ""
 
+    signal openProfile()
     signal openSettings()
     signal openSearch()
     signal imageClicked(string imageUrl)
@@ -54,14 +55,19 @@ Page {
             numberOfSlots: 2
             actions: [
                 Action {
-                    iconName: "settings"
-                    text: i18n.tr("Settings")
-                    onTriggered: page.openSettings()
-                },
-                Action {
                     iconName: "search"
                     text: i18n.tr("Search")
                     onTriggered: page.openSearch()
+                },
+                Action {
+                    iconName: "account"
+                    text: i18n.tr("Profile")
+                    onTriggered: page.openProfile()
+                },
+                Action {
+                    iconName: "settings"
+                    text: i18n.tr("Settings")
+                    onTriggered: page.openSettings()
                 }
             ]
         }

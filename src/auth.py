@@ -49,6 +49,7 @@ def _on_session_change(event: SessionEvent, session: Session) -> None:
     if event in (SessionEvent.CREATE, SessionEvent.REFRESH):
         print('Saving changed session')
         _save_session(session.export())
+        # ToDo: notify QML of session change for update properties of MainView (myDid, myHandle, etc.)
 
 
 def init_client() -> Client:

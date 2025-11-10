@@ -35,6 +35,7 @@ Page {
     property string postsCount: ""
     property string description: ""
     property string followingUri: ""
+    property bool me: false
 
     signal unFollowUser(string uri)
     signal imageClicked(string imageUrl)
@@ -169,6 +170,7 @@ Page {
                         id: followButton
                         text: page.followingUri ? "Following" : "Follow"
                         color: page.followingUri ? "#5D5D5D" : "#19B6EE"
+                        visible: !page.me
 
                         Layout.preferredHeight: units.gu(3)
                         Layout.minimumHeight:   Layout.preferredHeight
@@ -325,7 +327,7 @@ Page {
             page.followersCount = res.followersCount
             page.followsCount = res.followsCount
             page.postsCount = res.postsCount
-            page.description = res.description
+            page.description = res.description ? res.description : ""
             page.followingUri = res.followingUri
 
             loading = false

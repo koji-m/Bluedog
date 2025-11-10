@@ -34,6 +34,10 @@ MainView {
 
     property bool pythonReady: false
     property string dataDir: ""
+    property string myDid: ""
+    property string myHandle: ""
+    property string myDisplayName: ""
+    property string myAvatar: ""
 
     Page {
         id: splashPage
@@ -91,6 +95,10 @@ MainView {
                     splashPage.visible = false
                     root.pythonReady = true
                     if (res.status === 'succeeded') {
+                        root.myDid = res.did
+                        root.myHandle = res.handle
+                        root.myDisplayName = res.displayName
+                        root.myAvatar = res.avatar
                         stack.push(timelinePage, {}, {immediate: true})
                     } else {
                         stack.push(signInPage, {}, {immediate: true})
@@ -113,6 +121,10 @@ MainView {
                     splashPage.visible = false
                     stack.clear()
                     if (res.status === 'succeeded') {
+                        root.myDid = res.did
+                        root.myHandle = res.handle
+                        root.myDisplayName = res.displayName
+                        root.myAvatar = res.avatar
                         stack.push(timelinePage, {}, {immediate: true})
                     } else {
                         stack.push(signInPage, {}, {immediate: true})
@@ -126,6 +138,10 @@ MainView {
         SettingsPage {
             onSignOutRequested: function () {
                 py.call('backend.sign_out', [], function (res) {
+                    root.myDid = ""
+                    root.myHandle = ""
+                    root.myDisplayName = ""
+                    root.myAvatar = ""
                     stack.clear()
                     stack.push(signInPage)
                 }, function (err) {
@@ -171,7 +187,8 @@ MainView {
                     userDid: authorDid,
                     userAvatar: authorAvatar,
                     userDisplayName: authorDisplayName,
-                    userHandle: authorHandle
+                    userHandle: authorHandle,
+                    me: authorDid === root.myDid
                 })
             }
         }
@@ -184,6 +201,24 @@ MainView {
             }
             onOpenSearch: function() {
                 stack.push(searchPage)
+            }
+            onOpenProfile: function(
+                authorDid,
+                authorAvatar,
+                authorDisplayName,
+                authorHandle
+            ) {
+                py.call('backend.fetch_my_profile', [], function (res) {
+                    stack.push(userProfilePage, {
+                        userDid: res.did,
+                        userAvatar: res.avatar,
+                        userDisplayName: res.displayName,
+                        userHandle: res.handle,
+                        me: true
+                    })
+                }, function (err) {
+                    console.log("backend.fetch_my_profile error:", err)
+                })
             }
             onImageClicked: function(imageUrl) {
                 popupImage.source = imageUrl
@@ -220,7 +255,8 @@ MainView {
                     userDid: authorDid,
                     userAvatar: authorAvatar,
                     userDisplayName: authorDisplayName,
-                    userHandle: authorHandle
+                    userHandle: authorHandle,
+                    me: authorDid === root.myDid
                 })
             }
             onOpenPostClicked: function() {
@@ -270,7 +306,8 @@ MainView {
                     userDid: authorDid,
                     userAvatar: authorAvatar,
                     userDisplayName: authorDisplayName,
-                    userHandle: authorHandle
+                    userHandle: authorHandle,
+                    me: authorDid === root.myDid
                 })
             }
         }
@@ -312,7 +349,8 @@ MainView {
                     userDid: authorDid,
                     userAvatar: authorAvatar,
                     userDisplayName: authorDisplayName,
-                    userHandle: authorHandle
+                    userHandle: authorHandle,
+                    me: authorDid === root.myDid
                 })
             }
         }
