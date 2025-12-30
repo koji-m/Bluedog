@@ -9,7 +9,7 @@
             "desktop":  "bluedog.desktop"
         }
     },
-    "version": "0.1.0",
+    "version": "0.2.0",
     "maintainer": "Koji Matsumoto <otomustam.ijok@gmail.com>",
     "framework" : "@CLICK_FRAMEWORK@"
 }

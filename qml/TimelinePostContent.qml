@@ -13,12 +13,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import QtQuick 2.7
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 import Lomiri.Components 1.3
-import io.thp.pyotherside 1.4
 
 Item {
     id: root
@@ -38,6 +36,7 @@ Item {
 
     signal imageClicked(string imageUrl)
     signal videoClicked(string videoUrl)
+    signal quotePostClicked(string postUri)
 
     implicitWidth: contentColumn.implicitWidth
     implicitHeight: contentColumn.implicitHeight + units.gu(0.5)
@@ -154,10 +153,12 @@ Item {
                         onStatusChanged: {
                             if (status === Image.Ready && embed && embed.thumbs.length === 1) {
                                 if (root.width === 0) {
+                                    var root_ = root;
+                                    var imageContainer_ = imageContainer;
                                     Qt.callLater(function() {
-                                        if (root.width > 0) {
-                                            imageContainer.singleImageAspectRatio = sourceSize.width / sourceSize.height;
-                                            imageContainer.height = root.width / imageContainer.singleImageAspectRatio;
+                                        if (root_.width > 0) {
+                                            imageContainer_.singleImageAspectRatio = sourceSize.width / sourceSize.height;
+                                            imageContainer_.height = root_.width / imageContainer_.singleImageAspectRatio;
                                         }
                                     });
                                 } else {
@@ -289,6 +290,12 @@ Item {
                   root.imageClicked(imageUrl);
                 }
             }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    root.quotePostClicked(root.quotePost.uri);
+                }
+            }
         }
 
         RowLayout {
@@ -339,23 +346,9 @@ Item {
 
                     function likeClicked() {
                         if (root.viewerLikeUri === "") {
-                            py.call("backend.like_post", [root.uri, root.cid], function(res) {
-                                if (res.status === "succeeded") {
-                                    root.viewerLikeUri = res.uri;
-                                    root.likeCount += 1;
-                                }
-                            }, function(err) {
-                                console.log("likePost error:", err)
-                            })
+                            backend.likePost(root.uri, root.cid);
                         } else {
-                            py.call("backend.unlike_post", [root.viewerLikeUri], function(res) {
-                                if (res.status === "succeeded") {
-                                    root.viewerLikeUri = "";
-                                    root.likeCount -= 1;
-                                }
-                            }, function(err) {
-                                console.log("unlikePost error:", err)
-                            })
+                            backend.unlikePost(root.viewerLikeUri);
                         }
                     }
 

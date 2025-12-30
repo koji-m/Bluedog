@@ -1,6 +1,6 @@
 [Desktop Entry]
-_Name=Bluedog
-Exec=qmlscene %U qml/Main.qml
+Name=Bluedog
+Exec=bluedog %U
 Icon=assets/icon.svg
 Terminal=false
 Type=Application

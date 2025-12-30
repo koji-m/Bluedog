@@ -13,12 +13,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import QtQuick 2.7
 import QtQuick.Layouts 1.3
 import QtGraphicalEffects 1.0
 import Lomiri.Components 1.3
-import io.thp.pyotherside 1.4
 
 Page {
     id: page
@@ -154,7 +152,7 @@ Page {
         }
 
         onContentYChanged: {
-            if (!loading && hasMore && contentY + height >= contentHeight - 800) {
+            if (!page.loading && page.nextCursor && contentY + height >= contentHeight - 800) {
                 page.search(page.query, page.nextCursor)
             }
         }
@@ -163,10 +161,30 @@ Page {
     ListModel { id: postsModel }
     
     function search(query, cursor) {
-        loading = true
-        py.call("backend.search_posts", [query, 25, cursor], function(res) {
-            if (!cursor) postsModel.clear()
-            for (var i=0; i<res.items.length; i++) {
+        page.loading = true
+        if (!cursor) postsModel.clear()
+        backend.searchPosts(query, 25, cursor)
+    }
+
+    function refresh() {
+        backend.resetSearchState()
+        nextCursor = ''
+        hasMore = true
+    }
+
+    function refreshByPull() {
+        refresh()
+    }
+
+    Component.onCompleted: {
+        refresh()
+    }
+
+    Connections {
+        target: backend
+
+        onSearchResultFetched: function(res) {
+            for (var i=0; i < res.items.length; i++) {
                 postsModel.append({
                     displayText: res.items[i].text,
                     authorAvatar: res.items[i].avatar,
@@ -185,25 +203,12 @@ Page {
                     viewerLikeUri: res.items[i].viewer_like_uri,
                 })
             }
-            nextCursor = res.nextCursor || ""
-            hasMore = res.hasMore
-            loading = false
-        }, function(err) {
-            console.log("search_posts error:", err)
-            loading = false
-        })
-    }
+            page.nextCursor = res.nextCursor || ""
+            page.loading = false
+        }
 
-    function refresh() {
-        py.call("backend.init_search", [], function(res) {
-        }, function(err) {
-            console.log("init_search error:", err)
-        })
-        nextCursor = ''
-        hasMore = true
-    }
-
-    Component.onCompleted: {
-        refresh()
+        onSearchFailed: function() {
+            page.loading = false
+        }
     }
 }

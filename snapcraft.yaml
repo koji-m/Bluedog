@@ -45,9 +45,7 @@ layout:
 parts:
   main:
 
-    plugin: cmake
-    cmake-parameters:
-      - -DCMAKE_INSTALL_PREFIX=/
+    plugin: rust
 
     source: .
     build-snaps:
@@ -59,15 +57,13 @@ parts:
       - qtquickcontrols2-5-dev
       - intltool
 
-    stage-packages:
-      - qmlscene
-      - python3.12
-      - qml-module-io-thp-pyotherside
-
     override-prime: |
         craftctl default
         mkdir -p ${CRAFT_PRIME}/bin
         cp -a /snap/lomiri-ui-toolkit-core24/current/command-chain/lomiri-launch ${CRAFT_PRIME}/bin/lomiri-launch
+
+        cp -a ${CRAFT_PART_SRC}/assets ${CRAFT_PRIME}/
+        cp ${CRAFT_PART_SRC}/bluedog.desktop ${CRAFT_PRIME}/
 
   gpu-2404:
     after:

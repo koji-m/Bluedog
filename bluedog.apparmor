@@ -5,5 +5,5 @@
         "video",
         "content_exchange"
     ],
-    "policy_version": "@APPARMOR_POLICY@"
+    "policy_version": 20.04
 }

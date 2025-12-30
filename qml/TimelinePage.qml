@@ -13,18 +13,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import QtQuick 2.7
 import QtQuick.Layouts 1.3
 import QtGraphicalEffects 1.0
 import Lomiri.Components 1.3
-import io.thp.pyotherside 1.4
 
 Page {
     id: page
     property bool loading: false
     property bool loadingByPull: false
-    property bool hasMore: true
     property string nextCursor: ""
 
     signal openProfile()
@@ -33,6 +30,7 @@ Page {
     signal imageClicked(string imageUrl)
     signal videoClicked(string videoUrl)
     signal postClicked(var post)
+    signal quotePostClicked(string postUri)
     signal avatarClicked(
         string authorDid,
         string authorAvatar,
@@ -145,6 +143,9 @@ Page {
                     onBackgroundTapped: {
                         page.postClicked(model)
                     }
+                    onQuotePostClicked: function(postUri) {
+                        page.quotePostClicked(postUri)
+                    }
                     onAvatarClicked: function(
                         authorDid,
                         authorAvatar,
@@ -165,8 +166,43 @@ Page {
         }
 
         onContentYChanged: {
-            if (!loading && hasMore && contentY + height >= contentHeight - 800) {
-                page.fetch(nextCursor)
+            if (!page.loading && page.nextCursor && contentY + height >= contentHeight - 800) {
+                page.fetch(page.nextCursor)
+            }
+        }
+
+        function findIndexByUri(postUri) {
+            for (let i = 0; i < postsModel.count; i++) {
+                if (postsModel.get(i).uri === postUri) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        Connections {
+            target: backend
+
+            onLikeSucceeded: function(likeUri, postUri) {
+                let i = findIndexByUri(postUri);
+                if (i === -1) return;
+                postModel.setProperty(i, "viewerLikeUri", likeUri);
+                postModel.setProperty(i, "likeCount", postModel.get(i).likeCount + 1);
+            }
+
+            onLikeFailed: function() {
+                console.log("Like failed");
+            }
+
+            onUnlikeSucceeded: function(postUri) {
+                let i = findIndexByUri(postUri);
+                if (i === -1) return;
+                postModel.setProperty(i, "viewerLikeUri", "");
+                postModel.setProperty(i, "likeCount", postModel.get(i).likeCount - 1);
+            }
+
+            onUnlikeFailed: function() {
+                console.log("Unlike failed");
             }
         }
     }
@@ -198,18 +234,31 @@ Page {
         }
     }
     
-    function resetState() {
-        py.call("backend.reset_state", [], function(res) {
-        }, function(err) {
-            console.log("reset_state error:", err)
-        })
+    function fetch(cursor) {
+        page.loading = true
+        if (!cursor) postsModel.clear()
+        backend.getTimeline(30, cursor)
     }
 
-    function fetch(cursor) {
-        loading = true
-        py.call("backend.fetch_timeline", [30, cursor], function(res) {
-            if (!cursor) postsModel.clear()
-            for (var i=0; i<res.items.length; i++) {
+    function fetchPost(rkey, handle) {
+        page.loading = true
+    }
+
+    function refresh() {
+        nextCursor = ''
+        fetch('')
+    }
+
+    function refreshByPull() {
+        backend.resetTimelineState()
+        refresh()
+    }
+
+    Connections {
+        target: backend
+
+        onTimelineFetched: function(res) {
+            for (var i=0; i < res.items.length; i++) {
                 postsModel.append({
                     displayText: res.items[i].text,
                     authorAvatar: res.items[i].avatar,
@@ -228,54 +277,13 @@ Page {
                     viewerLikeUri: res.items[i].viewer_like_uri,
                 })
             }
-            nextCursor = res.nextCursor || ""
-            hasMore = res.hasMore
-            loading = false
-        }, function(err) {
-            console.log("fetch_timeline error:", err)
-            loading = false
-        })
-    }
+            page.nextCursor = res.nextCursor || ""
+            page.loading = false
+        }
 
-    function fetchPost(rkey, handle) {
-        loading = true
-        py.call("backend.fetch_post", [rkey, handle], function(res) {
-            let post = res.items[0]
-            postsModel.insert(0, {
-                displayText: post.text,
-                authorAvatar: post.avatar,
-                authorHandle: post.authorHandle,
-                authorDisplayName: post.authorDisplayName,
-                authorDid: post.authorDid,
-                postedAt: post.postedAt,
-                replyCount: post.replyCount,
-                quoteAndRepostCount: post.quoteAndRepostCount,
-                likeCount: post.likeCount,
-                repostedBy: post.repostedBy,
-                quotePost: post.quotePost ? JSON.stringify(post.quotePost) : '',
-                embed: post.embed ? JSON.stringify(post.embed) : '',
-                uri: post.uri,
-                cid: post.cid,
-                viewerLikeUri: post.viewer_like_uri,
-            })
-            nextCursor = res.nextCursor || ''
-            hasMore = res.hasMore
-            loading = false
-        }, function(err) {
-            console.log("fetch_post error:", err)
-            loading = false
-        })
-    }
-
-    function refresh() {
-        nextCursor = ''
-        hasMore = true
-        fetch('')
-    }
-
-    function refreshByPull() {
-        resetState()
-        refresh()
+        onTimelineFetchFailed: function() {
+            page.loading = false
+        }
     }
 
     Component.onCompleted: {

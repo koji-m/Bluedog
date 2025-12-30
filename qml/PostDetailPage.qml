@@ -13,12 +13,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import QtQuick 2.7
 import QtQuick.Layouts 1.3
 import QtGraphicalEffects 1.0
 import Lomiri.Components 1.3
-import io.thp.pyotherside 1.4
 
 Page {
     id: page
@@ -35,6 +33,7 @@ Page {
     property int replyCount: 0
     property int quoteAndRepostCount: 0
     property int likeCount: 0
+    property var quotePost: null
     property string uri: ""
     property var embed: null
     property string cid: ""
@@ -50,6 +49,7 @@ Page {
         string authorDisplayName,
         string authorHandle
     )
+    signal quotePostClicked(string postUri)
 
     function linkify(s) {
         var re = /((https?:\/\/[^\s<>"'()]+?[A-Za-z0-9\/#]))(?=[\s'")\]]|$)/g;
@@ -358,6 +358,39 @@ Page {
                         }
                     }
 
+                    Rectangle {
+                        id: borderRect
+                        width: root.width
+                        height: quotedPost.visible ? quotedPost.height + units.gu(2) : 0
+                        color: "transparent"
+                        border.color: "#cccccc"
+                        border.width: 1
+
+                        QuotePost {
+                            id: quotedPost
+                            width: parent.width
+                            height: implicitHeight
+                            visible: page.quotePost != null
+
+                            avatarUrl: page.quotePost ? page.quotePost.avatar : ""
+                            rawText: page.quotePost ? page.quotePost.text : ""
+                            authorHandle: page.quotePost ? page.quotePost.authorHandle : ""
+                            authorDisplayName: page.quotePost ? page.quotePost.authorDisplayName : ""
+                            authorDid: page.quotePost ? page.quotePost.authorDid : ""
+                            postedAt: page.quotePost ? page.quotePost.postedAt : ""
+                            embeds: page.quotePost ? page.quotePost.embeds : []
+                            onImageClicked: function(imageUrl) {
+                                page.imageClicked(imageUrl);
+                            }
+                        }
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                page.quotePostClicked(page.quotePost.uri);
+                            }
+                        }
+                    }
+
                     Text {
                         id: postedAt
                         width: root.width
@@ -415,24 +448,10 @@ Page {
                                 color: page.viewerLikeUri === "" ? "gray" : "deeppink"
 
                                 function likeClicked() {
-                                    if (page.viewerLikeUri === "") {
-                                        py.call("backend.like_post", [page.uri, page.cid], function(res) {
-                                            if (res.status === "succeeded") {
-                                                page.viewerLikeUri = res.uri;
-                                                page.likeCount += 1;
-                                            }
-                                        }, function(err) {
-                                            console.log("likePost error:", err)
-                                        })
+                                    if (root.viewerLikeUri === "") {
+                                        backend.likePost(root.uri, root.cid);
                                     } else {
-                                        py.call("backend.unlike_post", [page.viewerLikeUri], function(res) {
-                                            if (res.status === "succeeded") {
-                                                page.viewerLikeUri = "";
-                                                page.likeCount -= 1;
-                                            }
-                                        }, function(err) {
-                                            console.log("unlikePost error:", err)
-                                        })
+                                        backend.unlikePost(root.viewerLikeUri);
                                     }
                                 }
 
@@ -523,9 +542,85 @@ Page {
 
     ListModel { id: postsModel }
     
-    function fetch_replies(uri) {
-        loading = true
-        py.call("backend.fetch_replies", [uri], function(res) {
+    function refresh(uri) {
+        page.loading = true
+        backend.getPost(uri)
+    }
+
+    Component.onCompleted: {
+        refresh(page.uri)
+    }
+
+    function findIndexByUri(postUri) {
+        for (let i = 0; i < postsModel.count; i++) {
+            if (postsModel.get(i).uri === postUri) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    Connections {
+        target: backend
+        enabled: page.active
+
+        onGetPostSucceeded: function(res) {
+            page.avatarUrl =  res.avatar
+            page.rawText = res.text
+            page.authorHandle = res.authorHandle
+            page.authorDisplayName = res.authorDisplayName
+            page.authorDid = res.authorDid
+            page.postedAt = res.postedAt
+            page.replyCount = res.replyCount
+            page.quoteAndRepostCount = res.quoteAndRepostCount
+            page.likeCount = res.likeCount
+            page.quotePost = res.quotePost
+            page.embed = res.embed ? res.embed : null
+            page.cid = res.cid
+            page.viewerLikeUri = res.viewer_like_uri
+
+            backend.getReplies(page.uri)
+        }
+
+        onGetPostFailed: function() {
+            page.loading = false
+            console.log("Get post failed");
+        }
+
+        onLikeSucceeded: function(likeUri, postUri) {
+            if (postUri === page.uri) {
+                page.viewerLikeUri = likeUri;
+                page.likeCount += 1;
+            } else {
+                let i = findIndexByUri(postUri);
+                if (i === -1) return;
+                postModel.setProperty(i, "viewerLikeUri", likeUri);
+                postModel.setProperty(i, "likeCount", postModel.get(i).likeCount + 1);
+            }
+        }
+
+        onLikeFailed: function() {
+            console.log("Like failed");
+        }
+
+        onUnlikeSucceeded: function(postUri) {
+            if (postUri === page.uri) {
+                page.viewerLikeUri = "";
+                page.likeCount -= 1;
+            } else {
+                let i = findIndexByUri(postUri);
+                if (i === -1) return;
+                postModel.setProperty(i, "viewerLikeUri", "");
+                postModel.setProperty(i, "likeCount", postModel.get(i).likeCount - 1);
+            }
+        }
+
+        onUnlikeFailed: function() {
+            console.log("Unlike failed");
+        }
+
+        onGetRepliesSucceeded:  function(res) {
+            page.loading = false
             postsModel.clear()
             for (var i=0; i<res.items.length; i++) {
                 postsModel.append({
@@ -546,18 +641,11 @@ Page {
                     viewerLikeUri: res.items[i].viewer_like_uri,
                 })
             }
-            loading = false
-        }, function(err) {
-            console.log("fetch_timeline error:", err)
-            loading = false
-        })
-    }
+        }
 
-    function refresh(uri) {
-        fetch_replies(uri)
-    }
-
-    Component.onCompleted: {
-        refresh(page.uri)
+        onGetRepliesFailed: function() {
+            page.loading = false
+            console.log("Get replies failed");
+        }
     }
 }

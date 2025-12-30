@@ -1,19 +1,8 @@
 clickable_minimum_required: 8.0.0
-builder: cmake
-framework: ubuntu-touch-24.04-1.x
-kill: qmlscene
-dependencies_host:
-  - python3-pip
-  - python3-setuptools
-  - python3-wheel
-prebuild:
-  - rm -rf ${INSTALL_DIR}/python
-  - pwd
-  - |
-    ARCH=${ARCH}
-    EXTRA_ARGS=""
-    if [ "$ARCH" = "arm64" ] || [ "$ARCH" = "armhf" ]; then
-    EXTRA_ARGS="--platform manylinux2014_aarch64"
-    fi
-    pip3 install --disable-pip-version-check --no-compile --only-binary=:all: $EXTRA_ARGS -r ${ROOT}/requirements.txt --target ${INSTALL_DIR}/python
- 
+builder: rust
+kill: bluedog
+install_root_data:
+- manifest.json
+- bluedog.apparmor
+- bluedog.desktop
+- assets

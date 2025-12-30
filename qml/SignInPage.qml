@@ -13,14 +13,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import QtQuick 2.7
 import Lomiri.Components 1.3
-import io.thp.pyotherside 1.4
 
 Page {
     id: page
     signal signedIn()
+    signal signInFailed()
+    signal ready()
+
+    onReady: function() {
+        busy.running = false
+    }
 
     header: PageHeader {
         id: header
@@ -57,20 +61,21 @@ Page {
             color: "#1386DC"
             enabled: !busy.running && userField.text.length > 0 && passField.text.length > 0
             onClicked: {
-                py.importModule('auth', function () {
-                    busy.running = true
-                    py.call('auth.sign_in', [userField.text, passField.text], function (res) {
-                        busy.running = false
-                        if (res.status === 'ok') {
-                            page.signedIn()
-                        } else {
-                            errorLabel.text = "Sign in failed"
-                        }
-                    }, function (err) {
-                        busy.running = false
-                        errorLabel.text = "" + err
-                    })
-                })
+                busy.running = true
+                backend.signIn(userField.text, passField.text)
+            }
+
+            Connections {
+                target: backend
+
+                onSignInSuccess: function() {
+                    busy.running = false
+                }
+
+                onSignInFailed: function() {
+                    busy.running = false
+                    errorLabel.text = "Sign in failed"
+                }
             }
         }
         ActivityIndicator { id: busy; running: false; visible: running }

@@ -13,15 +13,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import QtQuick 2.7
+import QtQuick.Controls 2.2
 import Lomiri.Components 1.3
 import Lomiri.Content 1.1
 import QtQuick.Layouts 1.3
 import Qt.labs.settings 1.0
 import Qt.labs.platform 1.0
 import QtMultimedia 5.9
-import io.thp.pyotherside 1.4
+import Backend 1.0
 
 MainView {
     id: root
@@ -31,53 +31,70 @@ MainView {
 
     width: units.gu(45)
     height: units.gu(75)
+    visible: true
 
-    property bool pythonReady: false
+    property bool backendReady: false
     property string dataDir: ""
     property string myDid: ""
     property string myHandle: ""
     property string myDisplayName: ""
     property string myAvatar: ""
 
+    Backend {
+        id: backend
+        dataDir: root.dataDir
+        onAgentInitialized: function(did) {
+            getMyProfile(did)
+        }
+        onAgentInitializationFailed: function() {
+            stack.push(signInPage, {}, {immediate: true})
+        }
+        onSignedIn: function(prof) {
+            root.myDid = prof.did
+            root.myHandle = prof.handle
+            root.myDisplayName = prof.displayName
+            root.myAvatar = prof.avatar
+            signInSuccess()
+            stack.clear()
+            stack.push(timelinePage, {}, {immediate: true})
+        }
+        onMyProfileFetched: function(prof) {
+            root.myDid = prof.did
+            root.myHandle = prof.handle
+            root.myDisplayName = prof.displayName
+            root.myAvatar = prof.avatar
+            stack.push(timelinePage, {}, {immediate: true})
+        }
+        onSignedOut: function() {
+            root.myDid = ""
+            root.myHandle = ""
+            root.myDisplayName = ""
+            root.myAvatar = ""
+            stack.clear()
+            stack.push(signInPage, {}, {immediate: true})
+        }
+        Component.onCompleted: {
+            root.backendReady = true
+        }
+    }
+
     Page {
         id: splashPage
         anchors.fill: parent
-        visible: !pythonReady
+        visible: !backendReady
 
         Rectangle {
             anchors.fill: parent
             color: "#1386DC"
 
-            Image {
-                id: splashLogo
-                anchors.centerIn: parent
-                source: Qt.resolvedUrl('../assets/icon_splash.svg')
-                width: parent.width * 0.3
-                height: width
-                fillMode: Image.PreserveAspectFit
-            }
-        }
-        // Label {
-        //     anchors.fill: parent
-        //     text: 'Bluedog'
-
-        //     verticalAlignment: Label.AlignVCenter
-        //     horizontalAlignment: Label.AlignHCenter
-        // }
-    }
-
-    Python {
-        id: py
-
-        onReceived: function (msg) {
-            if (msg && msg.type === "authExpired") {
-                stack.clear()
-                stack.push(signInPage)
-            }
-        }
-
-        onError: {
-            console.log('python error: ' + traceback);
+            // Image {
+            //     id: splashLogo
+            //     anchors.centerIn: parent
+            //     source: Qt.resolvedUrl('../assets/icon_splash.svg')
+            //     width: parent.width * 0.3
+            //     height: width
+            //     fillMode: Image.PreserveAspectFit
+            // }
         }
     }
 
@@ -86,51 +103,15 @@ MainView {
         anchors.fill: parent
 
         Component.onCompleted: {
-            py.addImportPath(Qt.resolvedUrl('../python/'));
-            py.addImportPath(Qt.resolvedUrl('../src/'));
-            py.importModule('backend', function () {
-                var loc = StandardPaths.writableLocation(StandardPaths.AppDataLocation);
-                root.dataDir = (loc && typeof loc.toLocalFile === "function") ? loc.toLocalFile() : (typeof loc === "string" ? loc : String(loc));
-                py.call('backend.init', [root.dataDir], function (res) {
-                    splashPage.visible = false
-                    root.pythonReady = true
-                    if (res.status === 'succeeded') {
-                        root.myDid = res.did
-                        root.myHandle = res.handle
-                        root.myDisplayName = res.displayName
-                        root.myAvatar = res.avatar
-                        stack.push(timelinePage, {}, {immediate: true})
-                    } else {
-                        stack.push(signInPage, {}, {immediate: true})
-                    }
-                }, function (err) {
-                    console.log("backend.init error:", err)
-                    stack.push(signInPage, {}, {immediate: true})
-                    splashPage.visible = false
-                    root.pythonReady = true
-                })
-            })
+            var loc = StandardPaths.writableLocation(StandardPaths.AppDataLocation);
+            backend.dataDir = (loc && typeof loc.toLocalFile === "function") ? loc.toLocalFile() : (typeof loc === "string" ? loc : String(loc));
+            backend.init()
         }
     }
 
     Component {
         id: signInPage
         SignInPage {
-            onSignedIn: function () {
-                py.call('backend.init', [root.dataDir], function (res) {
-                    splashPage.visible = false
-                    stack.clear()
-                    if (res.status === 'succeeded') {
-                        root.myDid = res.did
-                        root.myHandle = res.handle
-                        root.myDisplayName = res.displayName
-                        root.myAvatar = res.avatar
-                        stack.push(timelinePage, {}, {immediate: true})
-                    } else {
-                        stack.push(signInPage, {}, {immediate: true})
-                    }
-                })
-            }
         }
     }
     Component {
@@ -163,18 +144,7 @@ MainView {
             }
             onPostClicked: function(post) {
                 stack.push(postDetailPage, {
-                    avatarUrl: post.authorAvatar,
-                    rawText: post.displayText,
-                    authorHandle: post.authorHandle,
-                    authorDisplayName: post.authorDisplayName,
-                    postedAt: post.postedAt,
-                    replyCount: post.replyCount,
-                    quoteAndRepostCount: post.quoteAndRepostCount,
-                    likeCount: post.likeCount,
                     uri: post.uri,
-                    embed: post.embed ? JSON.parse(post.embed) : null,
-                    cid: post.cid,
-                    viewerLikeUri: post.viewerLikeUri
                 })
             }
             onAvatarClicked: function(
@@ -195,6 +165,7 @@ MainView {
     }
     Component {
         id: timelinePage
+
         TimelinePage {
             onOpenSettings: function() {
                 stack.push(settingsPage)
@@ -208,16 +179,12 @@ MainView {
                 authorDisplayName,
                 authorHandle
             ) {
-                py.call('backend.fetch_my_profile', [], function (res) {
-                    stack.push(userProfilePage, {
-                        userDid: res.did,
-                        userAvatar: res.avatar,
-                        userDisplayName: res.displayName,
-                        userHandle: res.handle,
-                        me: true
-                    })
-                }, function (err) {
-                    console.log("backend.fetch_my_profile error:", err)
+                stack.push(userProfilePage, {
+                    userDid: root.myDid,
+                    userAvatar: root.myAvatar,
+                    userDisplayName: root.myDisplayName,
+                    userHandle: root.myHandle,
+                    me: true
                 })
             }
             onImageClicked: function(imageUrl) {
@@ -230,19 +197,12 @@ MainView {
             }
             onPostClicked: function(post) {
                 stack.push(postDetailPage, {
-                    avatarUrl: post.authorAvatar,
-                    rawText: post.displayText,
-                    authorHandle: post.authorHandle,
-                    authorDisplayName: post.authorDisplayName,
-                    authorDid: post.authorDid,
-                    postedAt: post.postedAt,
-                    replyCount: post.replyCount,
-                    quoteAndRepostCount: post.quoteAndRepostCount,
-                    likeCount: post.likeCount,
                     uri: post.uri,
-                    embed: post.embed ? JSON.parse(post.embed) : null,
-                    cid: post.cid,
-                    viewerLikeUri: post.viewerLikeUri
+                })
+            }
+            onQuotePostClicked: function(postUri) {
+                stack.push(postDetailPage, {
+                    uri: postUri,
                 })
             }
             onAvatarClicked: function(
@@ -281,19 +241,7 @@ MainView {
             }
             onPostClicked: function(post) {
                 stack.push(postDetailPage, {
-                    avatarUrl: post.authorAvatar,
-                    rawText: post.displayText,
-                    authorHandle: post.authorHandle,
-                    authorDisplayName: post.authorDisplayName,
-                    authorDid: post.authorDid,
-                    postedAt: post.postedAt,
-                    replyCount: post.replyCount,
-                    quoteAndRepostCount: post.quoteAndRepostCount,
-                    likeCount: post.likeCount,
                     uri: post.uri,
-                    embed: post.embed ? JSON.parse(post.embed) : null,
-                    cid: post.cid,
-                    viewerLikeUri: post.viewerLikeUri
                 })
             }
             onAvatarClicked: function(
@@ -308,6 +256,11 @@ MainView {
                     userDisplayName: authorDisplayName,
                     userHandle: authorHandle,
                     me: authorDid === root.myDid
+                })
+            }
+            onQuotePostClicked: function(postUri) {
+                stack.push(postDetailPage, {
+                    uri: postUri,
                 })
             }
         }
@@ -325,18 +278,7 @@ MainView {
             }
             onPostClicked: function(post) {
                 stack.push(postDetailPage, {
-                    avatarUrl: post.authorAvatar,
-                    rawText: post.displayText,
-                    authorHandle: post.authorHandle,
-                    authorDisplayName: post.authorDisplayName,
-                    postedAt: post.postedAt,
-                    replyCount: post.replyCount,
-                    quoteAndRepostCount: post.quoteAndRepostCount,
-                    likeCount: post.likeCount,
                     uri: post.uri,
-                    embed: post.embed ? JSON.parse(post.embed) : null,
-                    cid: post.cid,
-                    viewerLikeUri: post.viewerLikeUri
                 })
             }
             onAvatarClicked: function(

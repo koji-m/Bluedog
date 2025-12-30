@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the bluedog.koji-m package.
+# This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: bluedog.koji-m\n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-10 10:20+0000\n"
+"POT-Creation-Date: 2025-12-30 00:14+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,18 +17,14 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../qml/PostDetailPage.qml:77 ../qml/TimelinePage.qml:69
-msgid "Settings"
-msgstr ""
-
-#: ../qml/TimelinePage.qml:59
+#: qml/TimelinePage.qml:57
 msgid "Search"
 msgstr ""
 
-#: ../qml/TimelinePage.qml:64
+#: qml/TimelinePage.qml:62
 msgid "Profile"
 msgstr ""
 
-#: bluedog.desktop.in.h:1
-msgid "Bluedog"
+#: qml/TimelinePage.qml:67 qml/PostDetailPage.qml:77
+msgid "Settings"
 msgstr ""

@@ -13,17 +13,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import QtQuick 2.7
 import QtQuick.Layouts 1.3
 import QtGraphicalEffects 1.0
 import Lomiri.Components 1.3
-import io.thp.pyotherside 1.4
 
 Page {
     id: page
     property bool loading: true
-    property bool hasMore: false
     property string nextCursor: ""
     property string userDid: ""
     property string userAvatar: ""
@@ -49,27 +46,11 @@ Page {
     )
 
     function unfollowUser(uri) {
-        py.call("backend.unfollow_user", [uri], function(res) {
-            if (res.status === 'succeeded') {
-                page.followingUri = ''
-            } else {
-                console.log("unfollow_user failed:", res)
-            }
-        }, function(err) {
-            console.log("unfollow_user error:", err)
-        })
+        backend.unfollowUser(uri)
     }
 
     function followUser(did) {
-        py.call("backend.follow_user", [did], function(res) {
-            if (res.status === 'succeeded') {
-                page.followingUri = res.uri
-            } else {
-                console.log("follow_user failed:", res)
-            }
-        }, function(err) {
-            console.log("follow_user error:", err)
-        })
+        backend.followUser(did)
     }
 
     header: PageHeader {
@@ -312,8 +293,8 @@ Page {
         }
 
         onContentYChanged: {
-            if (!loading && hasMore && contentY + height >= contentHeight - 800) {
-                page.fetch_user_posts(userDid, nextCursor)
+            if (!page.loading && page.nextCursor && contentY + height >= contentHeight - 800) {
+                page.fetch_user_posts(page.userDid, page.nextCursor)
             }
         }
     }
@@ -322,24 +303,45 @@ Page {
 
     function fetch_user_profile(did) {
         loading = true
-        py.call("backend.fetch_user_profile", [did], function(res) {
-            page.banner = res.banner ? res.banner : ""
-            page.followersCount = res.followersCount
-            page.followsCount = res.followsCount
-            page.postsCount = res.postsCount
-            page.description = res.description ? res.description : ""
-            page.followingUri = res.followingUri
-
-            loading = false
-        }, function(err) {
-            loading = false
-        })
+        backend.getUserProfile(did)
     }
 
     function fetch_user_posts(did, cursor) {
         loading = true
-        py.call("backend.fetch_user_posts", [did, 30, cursor], function(res) {
-            if (!cursor) postsModel.clear()
+        backend.getUserPosts(did, 30, cursor)
+    }
+
+    function refresh(userDid) {
+        page.loading = true
+        page.nextCursor = ""
+        backend.resetAuthorFeedState()
+        fetch_user_profile(userDid)
+        fetch_user_posts(userDid, '')
+    }
+
+    Component.onCompleted: {
+        page.refresh(userDid)
+    }
+
+    Connections {
+        target: backend
+
+        onUserProfileFetched: function(data) {
+            page.banner = data.banner ? data.banner : ""
+            page.followersCount = data.followersCount
+            page.followsCount = data.followsCount
+            page.postsCount = data.postsCount
+            page.description = data.description
+            page.followingUri = data.followingUri
+
+            page.loading = false
+        }
+        onUserProfileFetchFailed: function() {
+            page.loading = false
+        }
+
+        onUserPostsFetched: function(res, init) {
+            if (init) postsModel.clear()
             for (var i=0; i < res.items.length; i++) {
                 postsModel.append({
                     displayText: res.items[i].text,
@@ -360,27 +362,27 @@ Page {
                 })
             }
             nextCursor = res.nextCursor || ""
-            hasMore = res.hasMore
-            loading = false
-        }, function(err) {
-            console.log("fetch_user_posts error:", err)
-            loading = false
-        })
-    }
+            page.loading = false
+        }
 
-    function refresh(userDid) {
-        page.loading = true
-        page.nextCursor = ""
-        page.hasMore = false
-        py.call("backend.reset_user_posts_cache", [], function(res) {
-        }, function(err) {
-            console.log("reset_user_posts_cache error:", err)
-        })
-        fetch_user_profile(userDid)
-        fetch_user_posts(userDid, '')
-    }
+        onUserPostsFetchFailed: function() {
+            page.loading = false
+        }
 
-    Component.onCompleted: {
-        page.refresh(userDid)
-    }
+        onFollowSucceeded: function(uri) {
+            page.followingUri = uri
+        }
+
+        onFollowFailed: function() {
+            console.log('Follow failed')
+        }
+
+        onUnfollowSucceeded: function() {
+            page.followingUri = ''
+        }
+
+        onUnfollowFailed: function() {
+            console.log('Unfollow failed')
+        }
+    }   
 }

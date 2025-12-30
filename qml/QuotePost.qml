@@ -13,13 +13,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import QtQuick 2.7
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 import QtGraphicalEffects 1.0
 import Lomiri.Components 1.3
-import io.thp.pyotherside 1.4
 
 Column {
     id: root
@@ -159,7 +157,7 @@ Column {
         return null;
     }
 
-    property var images: getImages(embeds)
+    property var images: getImages(root.embeds)
 
     Item {
         id: imageContainer
