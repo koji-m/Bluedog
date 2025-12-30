@@ -12,6 +12,7 @@ qrc!(qml_resources,
         "qml/TimelinePost.qml",
         "qml/TimelinePostContent.qml",
         "qml/UserProfilePage.qml",
+        "assets/avatar_none.svg",
     },
 );
 

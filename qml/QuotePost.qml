@@ -79,7 +79,7 @@ Column {
             Image {
                 id: avatar
                 anchors.fill: parent
-                source: avatarUrl
+                source: avatarUrl ? avatarUrl : Qt.resolvedUrl("../assets/avatar_none.svg")
                 visible: false
 
                 

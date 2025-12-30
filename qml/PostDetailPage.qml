@@ -145,7 +145,7 @@ Page {
                             Image {
                                 id: avatar
                                 anchors.fill: parent
-                                source: page.avatarUrl
+                                source: page.avatarUrl ? page.avatarUrl : Qt.resolvedUrl("../assets/avatar_none.svg")
                                 visible: false
                             }
                             OpacityMask {

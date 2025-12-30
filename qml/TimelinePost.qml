@@ -62,7 +62,7 @@ RowLayout {
         Image {
             id: avatar
             anchors.fill: parent
-            source: authorAvatar
+            source: authorAvatar ? authorAvatar : Qt.resolvedUrl("../assets/avatar_none.svg")
             visible: false
 
             
