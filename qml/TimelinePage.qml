@@ -85,7 +85,6 @@ Page {
             onRefresh: {
                 page.loadingByPull = true
                 page.refreshByPull()
-                page.loadingByPull = false
             }
         }
         delegate: ListItem {
@@ -279,10 +278,12 @@ Page {
             }
             page.nextCursor = res.nextCursor || ""
             page.loading = false
+            page.loadingByPull = false
         }
 
         onTimelineFetchFailed: function() {
             page.loading = false
+            page.loadingByPull = false
         }
     }
 
