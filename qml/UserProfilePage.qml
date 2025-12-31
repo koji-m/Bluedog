@@ -132,7 +132,7 @@ Page {
                         Image {
                             id: avatar
                             anchors.fill: parent
-                            source: page.userAvatar
+                            source: page.userAvatar ? page.userAvatar : Qt.resolvedUrl("../assets/avatar_none.svg")
                             visible: false
                         }
                         OpacityMask {
@@ -244,6 +244,23 @@ Page {
                     right: parent.right
                     top: parent.top
                     bottom: parent.bottom
+                }
+
+                RowLayout {
+                    Layout.leftMargin: units.gu(4)
+                    visible: model.repostedBy.length > 0
+
+                    Icon {
+                        width: units.gu(2)
+                        height: units.gu(2)
+                        name: 'retweet'
+                    }
+                    Text {
+                        id: repostedByText
+                        text: model.repostedBy + " reposted"
+                        font.weight: Font.Thin
+                        elide: Text.ElideRight
+                    }
                 }
 
                 TimelinePost {

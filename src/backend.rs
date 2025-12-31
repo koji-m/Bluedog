@@ -124,9 +124,9 @@ fn parse_feed_view_post(post: &PostView, reposted_by: &str) -> QVariantMap {
     let mut res = QVariantMap::default();
     let author = &post.author.data;
 
-    let avatar: QString = author.avatar.as_ref().unwrap().as_str().into();
+    let avatar: QString = author.avatar.as_ref().unwrap_or(&"".to_string()).as_str().into();
     let handle: QString = author.handle.as_ref().into();
-    let display_name: QString = author.display_name.as_ref().unwrap().as_str().into();
+    let display_name: QString = author.display_name.as_ref().unwrap_or(&"".to_string()).as_str().into();
     let did: QString = author.did.as_ref().into();
     res.insert("avatar".into(), avatar.into());
     res.insert("authorHandle".into(), handle.into());
