@@ -168,7 +168,7 @@ Page {
 
     function refresh() {
         backend.resetSearchState()
-        nextCursor = ''
+        page.nextCursor = ''
         hasMore = true
     }
 
