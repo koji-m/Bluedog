@@ -41,7 +41,7 @@ Page {
 
     header: PageHeader {
         id: header
-        title: "Timeline"
+        title: "Following"
 
         ActionBar {
             anchors {
